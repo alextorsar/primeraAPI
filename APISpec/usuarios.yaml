@@ -1,0 +1,219 @@
+openapi: 3.0.2
+info:
+  title: API Usuarios
+  description: Esta es la API de usuarios de nuestra aplicación de recomendación de
+    restaurantes
+  version: "1.0"
+servers:
+- url: "https://{hostname}/api"
+  variables:
+    hostname:
+      default: localhost:8080
+tags:
+- name: Usuarios
+paths:
+  /usuario/:
+    get:
+      tags:
+      - Usuarios
+      description: Obtener un usuario por su id
+      operationId: usuario_user_id_get
+      parameters:
+      - name: userId
+        in: query
+        description: ID del usuario que quieres devolver
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: operación con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+        "401":
+          description: Operación no autorizada
+      security:
+      - BearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.usuarios_controller
+    put:
+      tags:
+      - Usuarios
+      description: Actualizar información de un usuario
+      operationId: usuario_user_id_put
+      parameters:
+      - name: userId
+        in: query
+        description: ID del usuario que quieres actualizar
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      requestBody:
+        $ref: '#/components/requestBodies/UsuarioRequest'
+      responses:
+        "200":
+          description: operación con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+        "401":
+          description: Operación no autorizada
+      security:
+      - BearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.usuarios_controller
+    delete:
+      tags:
+      - Usuarios
+      description: Eliminar un usuario
+      operationId: usuario_user_id_delete
+      parameters:
+      - name: userId
+        in: query
+        description: ID del usuario que quieres eliminar
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Usuario eliminado
+        "401":
+          description: Operación no autorizada
+      security:
+      - BearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.usuarios_controller
+  /usuario:
+    post:
+      tags:
+      - Usuarios
+      description: Crear un usuario
+      operationId: usuario_post
+      requestBody:
+        $ref: '#/components/requestBodies/UsuarioRequest'
+      responses:
+        "200":
+          description: Usuario creado
+        "400":
+          description: Input inválida
+        "401":
+          description: Operación no autorizada
+      security:
+      - BearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.usuarios_controller
+
+    get:
+      tags:
+      - Usuarios
+      description: Obtener los usuarios con un numero de reviews
+      operationId: number_reviews_get
+      parameters:
+      - name: limit
+        in: query
+        description: numero de reseñas
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: operación con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioReviewerArray'
+        "401":
+          description: Operación no autorizada
+      security:
+      - BearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.usuarios_controller
+components:
+  schemas:
+    Usuario:
+      required:
+      - correo
+      - direccion
+      - id
+      - nombre
+      type: object
+      properties:
+        userId:
+          type: integer
+        nombre:
+          type: string
+        correo:
+          type: string
+        direccion:
+          type: string
+      description: Objeto Usuario
+      example:
+        correo: correo
+        direccion: direccion
+        userId: 0
+        nombre: nombre
+    UsuarioReviewerArray:
+      required:
+      - arrayUserReviewer
+      type: object
+      properties:
+        arrayUserReviewer:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsuarioReviewer'
+      description: "Array de {reviewerId, id}"
+      example:
+        arrayUserReviewer:
+        - reviewerId: 0
+          id: 6
+        - reviewerId: 0
+          id: 6
+    UsuarioReviewer:
+      required:
+      - id
+      - reviewerId
+      type: object
+      properties:
+        reviewerId:
+          type: integer
+        id:
+          type: integer
+      example:
+        reviewerId: 0
+        id: 6
+  responses:
+    UsuarioResponse:
+      description: operación con éxito
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Usuario'
+    UnauthorizedError:
+      description: Operación no autorizada
+    InvalidInput:
+      description: Input inválida
+    UsuarioReviewerListResponse:
+      description: operación con éxito
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UsuarioReviewerArray'
+  requestBodies:
+    UsuarioRequest:
+      description: Introducir datos de usuario
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Usuario'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: swagger_server.controllers.authorization_controller.check_BearerAuth
